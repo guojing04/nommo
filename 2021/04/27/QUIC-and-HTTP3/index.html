@@ -20,27 +20,29 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
 
 <script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;159.75.229.85&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Pisces&quot;,&quot;version&quot;:&quot;8.3.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;Searching...&quot;,&quot;empty&quot;:&quot;We didn&#39;t find any results for the search: ${query}&quot;,&quot;hits_time&quot;:&quot;${hits} results found in ${time} ms&quot;,&quot;hits&quot;:&quot;${hits} results found&quot;}}</script>
-<meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta name="description" content="QUIC 概述 Quic 全称 quick udp internet connection [1]，“快速 UDP 互联网连接”，（和英文 quick 谐音，简称“快”）是由 google 提出的使用 udp 进行多路并发传输的协议。Quic 相比现在广泛应用的 http2+tcp+tls 协议有如下优势 [2]：  减少了 TCP 三次握手及 TLS 握手时间。 改进的拥塞控制。 避免队头阻塞的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://159.75.229.85/2021/04/26/hello-world/index.html">
+<meta property="og:title" content="QUIC and HTTP3">
+<meta property="og:url" content="http://159.75.229.85/2021/04/27/QUIC-and-HTTP3/index.html">
 <meta property="og:site_name" content="Nommo">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta property="og:description" content="QUIC 概述 Quic 全称 quick udp internet connection [1]，“快速 UDP 互联网连接”，（和英文 quick 谐音，简称“快”）是由 google 提出的使用 udp 进行多路并发传输的协议。Quic 相比现在广泛应用的 http2+tcp+tls 协议有如下优势 [2]：  减少了 TCP 三次握手及 TLS 握手时间。 改进的拥塞控制。 避免队头阻塞的">
 <meta property="og:locale">
-<meta property="article:published_time" content="2021-04-26T11:58:00.450Z">
-<meta property="article:modified_time" content="2021-04-26T11:58:00.450Z">
+<meta property="og:image" content="http://159.75.229.85/images/quic.png">
+<meta property="article:published_time" content="2021-04-27T12:09:35.000Z">
+<meta property="article:modified_time" content="2021-04-27T12:20:27.675Z">
 <meta property="article:author" content="Nommo">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://159.75.229.85/images/quic.png">
 
 
-<link rel="canonical" href="http://159.75.229.85/2021/04/26/hello-world/">
+<link rel="canonical" href="http://159.75.229.85/2021/04/27/QUIC-and-HTTP3/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;159.75.229.85&#x2F;2021&#x2F;04&#x2F;26&#x2F;hello-world&#x2F;&quot;,&quot;path&quot;:&quot;2021&#x2F;04&#x2F;26&#x2F;hello-world&#x2F;&quot;,&quot;title&quot;:&quot;Hello World&quot;}</script>
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;159.75.229.85&#x2F;2021&#x2F;04&#x2F;27&#x2F;QUIC-and-HTTP3&#x2F;&quot;,&quot;path&quot;:&quot;2021&#x2F;04&#x2F;27&#x2F;QUIC-and-HTTP3&#x2F;&quot;,&quot;title&quot;:&quot;QUIC and HTTP3&quot;}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
-<title>Hello World | Nommo</title><script src="/js/config.js"></script>
+<title>QUIC and HTTP3 | Nommo</title><script src="/js/config.js"></script>
   
 
 
@@ -108,7 +110,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Quick-Start"><span class="nav-number">1.</span> <span class="nav-text">Quick Start</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Create-a-new-post"><span class="nav-number">1.1.</span> <span class="nav-text">Create a new post</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Run-server"><span class="nav-number">1.2.</span> <span class="nav-text">Run server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Generate-static-files"><span class="nav-number">1.3.</span> <span class="nav-text">Generate static files</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Deploy-to-remote-sites"><span class="nav-number">1.4.</span> <span class="nav-text">Deploy to remote sites</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#QUIC-%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">QUIC 概述</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -161,7 +163,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh">
-    <link itemprop="mainEntityOfPage" href="http://159.75.229.85/2021/04/26/hello-world/">
+    <link itemprop="mainEntityOfPage" href="http://159.75.229.85/2021/04/27/QUIC-and-HTTP3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -174,7 +176,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Hello World
+          QUIC and HTTP3
         </h1>
 
         <div class="post-meta-container">
@@ -184,8 +186,9 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
+      
 
-      <time title="Created: 2021-04-26 19:58:00" itemprop="dateCreated datePublished" datetime="2021-04-26T19:58:00+08:00">2021-04-26</time>
+      <time title="Created: 2021-04-27 20:09:35 / Modified: 20:20:27" itemprop="dateCreated datePublished" datetime="2021-04-27T20:09:35+08:00">2021-04-27</time>
     </span>
 
   
@@ -198,19 +201,17 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+        <h1 id="QUIC-概述"><a href="#QUIC-概述" class="headerlink" title="QUIC 概述"></a>QUIC 概述</h1><p><img src="/images/quic.png" alt="QUIC 图片"></p>
+<p>Quic 全称 quick udp internet connection [1]，“快速 UDP 互联网连接”，（和英文 quick 谐音，简称“快”）是由 google 提出的使用 udp 进行多路并发传输的协议。<br>Quic 相比现在广泛应用的 http2+tcp+tls 协议有如下优势 [2]：</p>
+<ol>
+<li>减少了 TCP 三次握手及 TLS 握手时间。</li>
+<li>改进的拥塞控制。</li>
+<li>避免队头阻塞的多路复用。</li>
+<li>连接迁移。</li>
+<li>前向冗余纠错。</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/32553477">QUIC协议原理分析</a></p>
+<p>客户端实现<br>App必须集成支持QUIC协议的网络库，例如：<br>● lsquic-client<br>● cronet网络库<br>服务端实现</p>
 
     </div>
 
@@ -224,10 +225,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
+                <a href="/2021/04/26/hello-world/" rel="prev" title="Hello World">
+                  <i class="fa fa-chevron-left"></i> Hello World
+                </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/04/27/QUIC-and-HTTP3/" rel="next" title="QUIC and HTTP3">
-                  QUIC and HTTP3 <i class="fa fa-chevron-right"></i>
+                <a href="/2021/04/28/test/" rel="next" title="test">
+                  test <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
