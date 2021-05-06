@@ -28,7 +28,7 @@
 <meta property="og:description" content="简述Hexo 是一个流行的博客框架。本文记录了在腾讯云 CVM 上部署 Hexo 并实现自动部署更新的流程。 本地机器安装和配置 Hexo按照官方文档在电脑上安装，此处以 MAC 为例。Hexo 依赖 npm 和 git，需提前安装，然后执行以下命令安装： 1npm install -g hexo-cli  安装完成后即可执行各种 hexo 命令，常用命令包括： 1234# 初始化hexo ini">
 <meta property="og:locale">
 <meta property="article:published_time" content="2021-05-06T05:16:23.000Z">
-<meta property="article:modified_time" content="2021-05-06T08:06:49.801Z">
+<meta property="article:modified_time" content="2021-05-06T08:10:58.351Z">
 <meta property="article:author" content="Nommo">
 <meta name="twitter:card" content="summary">
 
@@ -121,7 +121,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -186,7 +186,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2021-05-06 13:16:23 / Modified: 16:06:49" itemprop="dateCreated datePublished" datetime="2021-05-06T13:16:23+08:00">2021-05-06</time>
+      <time title="Created: 2021-05-06 13:16:23 / Modified: 16:10:58" itemprop="dateCreated datePublished" datetime="2021-05-06T13:16:23+08:00">2021-05-06</time>
     </span>
 
   
@@ -220,22 +220,31 @@
 <p>执行 <code>nginx -s reload</code> 启动 nginx，并在浏览器访问页面进行测试。</p>
 <h2 id="配置自动部署"><a href="#配置自动部署" class="headerlink" title="配置自动部署"></a>配置自动部署</h2><p>为了达到在本地机器提交代码到 git 仓库后，cvm 上保持更新，需要做自动化部署。<br>这里结合 git webhook 和 fcgiwrap 进行实现。</p>
 <ol>
-<li>安装并配置 fcgiwrap<br><code>fcgiwrap</code> 为那些不支持直接运行 CGI脚本 的 Web 服务器提供一种运行 CGI脚本 的方式。<br>安装：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dnf --enablerepo&#x3D;epel -y install fcgiwrap</span><br></pre></td></tr></table></figure></li>
+<li>安装并配置 fcgiwrap<br><code>fcgiwrap</code> 为那些不支持直接运行 CGI脚本 的 Web 服务器提供一种运行 CGI脚本 的方式。<br>安装：</li>
 </ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dnf --enablerepo&#x3D;epel -y install fcgiwrap</span><br></pre></td></tr></table></figure>
+
 <p>配置 fcgiwrap：</p>
 <ul>
-<li>/etc/init.d/fcgiwrap<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">#!&#x2F;usr&#x2F;bin&#x2F;perl</span><br><span class="line"></span><br><span class="line">use strict;</span><br><span class="line">use warnings FATAL &#x3D;&gt; qw( all );</span><br><span class="line"></span><br><span class="line">use IO::Socket::UNIX;</span><br><span class="line"></span><br><span class="line">my $bin_path &#x3D; &#39;&#x2F;usr&#x2F;local&#x2F;bin&#x2F;fcgiwrap&#39;;</span><br><span class="line">my $socket_path &#x3D; $ARGV[0] || &#39;&#x2F;tmp&#x2F;cgi.sock&#39;;</span><br><span class="line">my $num_children &#x3D; $ARGV[1] || 1;</span><br><span class="line"></span><br><span class="line">close STDIN;</span><br><span class="line"></span><br><span class="line">unlink $socket_path;</span><br><span class="line">my $socket &#x3D; IO::Socket::UNIX-&gt;new(</span><br><span class="line">    Local &#x3D;&gt; $socket_path,</span><br><span class="line">    Listen &#x3D;&gt; 100,</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">die &quot;Cannot create socket at $socket_path: $!\n&quot; unless $socket;</span><br><span class="line"></span><br><span class="line">for (1 .. $num_children) &#123;</span><br><span class="line">    my $pid &#x3D; fork;</span><br><span class="line">    die &quot;Cannot fork: $!&quot; unless defined $pid;</span><br><span class="line">    next if $pid;</span><br><span class="line"></span><br><span class="line">    exec $bin_path;</span><br><span class="line">    die &quot;Failed to exec $bin_path: $!\n&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-修改文件属性并启动：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod +x &#x2F;etc&#x2F;init.d&#x2F;fcgiwrap</span><br><span class="line">&#x2F;etc&#x2F;init.d&#x2F;fcgiwrap</span><br></pre></td></tr></table></figure></li>
+<li>/etc/init.d/fcgiwrap</li>
 </ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">#!&#x2F;usr&#x2F;bin&#x2F;perl</span><br><span class="line"></span><br><span class="line">use strict;</span><br><span class="line">use warnings FATAL &#x3D;&gt; qw( all );</span><br><span class="line"></span><br><span class="line">use IO::Socket::UNIX;</span><br><span class="line"></span><br><span class="line">my $bin_path &#x3D; &#39;&#x2F;usr&#x2F;local&#x2F;bin&#x2F;fcgiwrap&#39;;</span><br><span class="line">my $socket_path &#x3D; $ARGV[0] || &#39;&#x2F;tmp&#x2F;cgi.sock&#39;;</span><br><span class="line">my $num_children &#x3D; $ARGV[1] || 1;</span><br><span class="line"></span><br><span class="line">close STDIN;</span><br><span class="line"></span><br><span class="line">unlink $socket_path;</span><br><span class="line">my $socket &#x3D; IO::Socket::UNIX-&gt;new(</span><br><span class="line">    Local &#x3D;&gt; $socket_path,</span><br><span class="line">    Listen &#x3D;&gt; 100,</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">die &quot;Cannot create socket at $socket_path: $!\n&quot; unless $socket;</span><br><span class="line"></span><br><span class="line">for (1 .. $num_children) &#123;</span><br><span class="line">    my $pid &#x3D; fork;</span><br><span class="line">    die &quot;Cannot fork: $!&quot; unless defined $pid;</span><br><span class="line">    next if $pid;</span><br><span class="line"></span><br><span class="line">    exec $bin_path;</span><br><span class="line">    die &quot;Failed to exec $bin_path: $!\n&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>修改文件属性并启动：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod +x &#x2F;etc&#x2F;init.d&#x2F;fcgiwrap</span><br><span class="line">&#x2F;etc&#x2F;init.d&#x2F;fcgiwrap</span><br></pre></td></tr></table></figure>
+
 <p>修改 nginx 配置：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-2-centos blog]# vi &#x2F;usr&#x2F;local&#x2F;nginx&#x2F;conf&#x2F;fcgiwrap.conf</span><br><span class="line"></span><br><span class="line"># create new</span><br><span class="line"># for example, enable CGI under [&#x2F;cgi-bin]</span><br><span class="line">location &#x2F;cgi-bin&#x2F; &#123;</span><br><span class="line">    fastcgi_param       SCRIPT_FILENAME     &quot;&#x2F;data&#x2F;blog&#x2F;deploy.sh&quot;;</span><br><span class="line">    fastcgi_param       PATH_INFO           $uri;</span><br><span class="line">    fastcgi_param       QUERY_STRING        $args;</span><br><span class="line">    fastcgi_param       HTTP_HOST           $server_name;</span><br><span class="line">    fastcgi_pass        unix:&#x2F;tmp&#x2F;cgi.sock;</span><br><span class="line">    include             fastcgi_params;     # 必须放在最后</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">[root@VM-16-2-centos blog]# vi &#x2F;usr&#x2F;local&#x2F;nginx&#x2F;conf&#x2F;nginx.conf</span><br><span class="line">server &#123;</span><br><span class="line">...</span><br><span class="line">    include fcgiwrap.conf;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>配置 deploy 脚本逻辑，主要完成代码更新的操作。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-2-centos blog]# vi &#x2F;data&#x2F;blog&#x2F;deploy.sh</span><br></pre></td></tr></table></figure>
+
 <ul>
-<li>/data/blog/deploy.sh<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#!&#x2F;bin&#x2F;bash</span><br><span class="line"></span><br><span class="line">cd &#x2F;data&#x2F;blog</span><br><span class="line"></span><br><span class="line">if [ ! -d &quot;public&quot; ]; then</span><br><span class="line">  git clone --depth&#x3D;1 git@gitee.com:nommo&#x2F;blog.git public &amp;&gt; history.log</span><br><span class="line">else</span><br><span class="line">  cd public</span><br><span class="line">  git pull origin master &amp;&gt; history.log</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">echo -ne &#39;Status: 200\r\n&#39;</span><br><span class="line">echo -ne &#39;Content-Type: text&#x2F;plain\r\n&#39;</span><br><span class="line">echo -ne &#39;\r\n&#39;</span><br><span class="line"></span><br><span class="line">echo &#39;PATH_INFO: &#39; $PATH_INFO</span><br><span class="line">echo &#39;Result: success&#39;</span><br><span class="line">exit 0</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li>/data/blog/deploy.sh</li>
 </ul>
-<p>在浏览器中访问 <a href="http://159.75.229.85/cgi-bin/">http://159.75.229.85/cgi-bin/</a> 查看返回是否成功。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#!&#x2F;bin&#x2F;bash</span><br><span class="line"></span><br><span class="line">cd &#x2F;data&#x2F;blog</span><br><span class="line"></span><br><span class="line">if [ ! -d &quot;public&quot; ]; then</span><br><span class="line">  git clone --depth&#x3D;1 git@gitee.com:nommo&#x2F;blog.git public &amp;&gt; history.log</span><br><span class="line">else</span><br><span class="line">  cd public</span><br><span class="line">  git pull origin master &amp;&gt; history.log</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">echo -ne &#39;Status: 200\r\n&#39;</span><br><span class="line">echo -ne &#39;Content-Type: text&#x2F;plain\r\n&#39;</span><br><span class="line">echo -ne &#39;\r\n&#39;</span><br><span class="line"></span><br><span class="line">echo &#39;PATH_INFO: &#39; $PATH_INFO</span><br><span class="line">echo &#39;Result: success&#39;</span><br><span class="line">exit 0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>执行 <code>nginx -s reload</code> 启动 nginx，在浏览器中访问 <a href="http://159.75.229.85/cgi-bin/">http://159.75.229.85/cgi-bin/</a> 查看返回是否成功。</p>
 
     </div>
 
@@ -249,8 +258,8 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/04/28/test/" rel="prev" title="test">
-                  <i class="fa fa-chevron-left"></i> test
+                <a href="/2021/04/27/QUIC-and-HTTP3/" rel="prev" title="QUIC and HTTP3">
+                  <i class="fa fa-chevron-left"></i> QUIC and HTTP3
                 </a>
             </div>
             <div class="post-nav-item">
