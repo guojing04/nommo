@@ -118,7 +118,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">4</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -148,6 +148,92 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://159.75.229.85/2021/05/08/%E5%85%B3%E4%BA%8EAndroid%E4%B8%AD%E7%9A%84R%E5%92%8CR2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Nommo">
+      <meta itemprop="description" content="记录点滴生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Nommo">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/05/08/%E5%85%B3%E4%BA%8EAndroid%E4%B8%AD%E7%9A%84R%E5%92%8CR2/" class="post-title-link" itemprop="url">关于Android中的R和R2</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-08 22:20:34" itemprop="dateCreated datePublished" datetime="2021-05-08T22:20:34+08:00">2021-05-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-05-10 15:26:12" itemprop="dateModified" datetime="2021-05-10T15:26:12+08:00">2021-05-10</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>Android的Project编译时会为drawable、string等资源生成唯一id，并生成R.java类包含这些id，以及resources.arsc，包含资源id和资源值/路径的对应关系。可以在Java代码中通过R类引用资源。<br>但是在使用开源库<a target="_blank" rel="noopener" href="https://github.com/JakeWharton/butterknife">ButterKnife</a>时引用资源时需要使用R2.java。<br>关于R和R2有哪些细节需要关注？</p>
+<h2 id="R"><a href="#R" class="headerlink" title="R"></a>R</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">public static final int value &#x3D; 0x7f0901f9; &#x2F;&#x2F; main project</span><br><span class="line">public static int value &#x3D; 0x1234; &#x2F;&#x2F; library project</span><br></pre></td></tr></table></figure>
+
+<p>Android主工程的R类中的字段时final的，library工程中R类的字段非final类型的。原因在于，Android工程编译时，主工程和library工程中的R字段会merge，library中的字段会被重新赋值。如果这个过程如果存在同名字段冲突，处理逻辑如下：</p>
+<ul>
+<li>如果主工程和library冲突，以主工程为准</li>
+<li>如果library之间冲突，以dependencies中第一个library为准</li>
+</ul>
+<p>因此，在library工程中引用R中的字段需要留意，比如在switch/case中不能使用非final的字段，需要转换成if/else的语句。</p>
+<p>编译时，主包java代码中对R的引用编译时被替换成常量值，library中的因为不是final没有替换。<br>编译后，library中的R文件中的字段也已经是经过merge后的final字段，代码中引用的地方也会被替换成常量值（gradle插件的操作？）。<br>所有引用都替换成常量后，R类就没有存在的必要了，proguard后的release包中已经没有R文件了。</p>
+<p>注：可反编译 <code>build/intermediates/compile_only_not_namespaced_r_class_jar/R.jar</code> 查看R类的实现。</p>
+<h2 id="R2"><a href="#R2" class="headerlink" title="R2"></a>R2</h2><p>R2类是ButterKnife框架在编译期生成的，其中的字段都是final的。Project中的多个R2为什么不会冲突？原因在于ButterKnife并不会真实使用R2中的字段值，实际引用的是R中同名字段的值。这一点可以从生成的类看出来。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SubActivity</span></span><br><span class="line"><span class="meta">@BindView(R2.id.text)</span></span><br><span class="line">TextView textView;</span><br><span class="line"></span><br><span class="line"><span class="comment">// SubActivity_ViewBinding</span></span><br><span class="line"><span class="keyword">import</span> com.battleshippark.mylibrary.R;</span><br><span class="line"></span><br><span class="line"><span class="meta">@UiThread</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">SubActivity_ViewBinding</span><span class="params">(SubActivity target, View source)</span> </span>&#123;</span><br><span class="line"> <span class="keyword">this</span>.target = target;</span><br><span class="line"> target.textView = (TextView)Utils.findRequiredViewAsType(source, R.id.text, <span class="string">&quot;field &#x27;textView&#x27;&quot;</span>, TextView.class);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><p><a target="_blank" rel="noopener" href="https://battleshippark.wordpress.com/2018/02/12/butterknife-library-project-r2-final/">https://battleshippark.wordpress.com/2018/02/12/butterknife-library-project-r2-final/</a><br><a target="_blank" rel="noopener" href="http://tools.android.com/tips/non-constant-fields">http://tools.android.com/tips/non-constant-fields</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_15827013/article/details/103717702">https://blog.csdn.net/qq_15827013/article/details/103717702</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
